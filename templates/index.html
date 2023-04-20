@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>ChatGPT</title>
+{#    标签页图标显示#}
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon-32x32.png') }}" type="image/x-icon">
+    <style type="text/css">
+        *{
+        padding: 0;
+        margin: 0;
+        }
+        body{
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            border: #aaaaaa;
+            align-items: center;
+            justify-content: center;
+        }
+        .all-container {
+            max-height: 760px;
+            height: 100vh;
+            width: 100%;
+            padding: 15px;
+            display: flex;
+            border: #aaaaaa;
+            flex-flow: row;
+            justify-content: center;
+            align-items: center;
+        }
+        .left-container{
+            height: 90%;
+            width: 160px;
+            min-width: 60px;
+            max-width: 200px;
+            border-radius: 4px;
+            border: 0.5px solid #D0D0D0;
+            background-color: #EEEEEE;
+            display: flex;
+            flex-flow: column;
+        }
+        .chat-list{
+            {#width: 100%;#}
+            overflow-y: scroll;
+            flex: 1;
+        }
+        .chat-list .selected{
+            background-color: #D0D0D0;
+        }
+        .chat-list::-webkit-scrollbar{
+            display: none;
+        }
+        .chat, .newchat{
+            border-bottom: 0.5px solid #cccccc;
+            border-top: 0.5px solid #cccccc;;
+            background-color: #EFEFEF;
+            padding: 10px;
+        }
+        .newchat{
+            color: #317d8a;
+        }
+        .newchat:hover{
+            background-color: #E8E8E8;
+        }
+        .chat:hover{
+            background-color: #E8E8E8;
+        }
+        .right-container{
+            height: 90%;
+            width: 760px;
+            min-width: 220px;
+            border-radius: 4px;
+            border: 0.5px solid #cccccc;
+            background-color: #f5f5f5;
+            display: flex;
+            flex-flow: column;
+            overflow: hidden;
+        }
+        .content{
+            width: calc(100% - 40px);
+            padding: 20px;
+            overflow-y: scroll;
+            flex: 1;
+        }
+        /* 设置滚动条的样式 */
+        .content::-webkit-scrollbar {
+            width:10px;
+        }
+        /* 滚动槽 */
+        .content::-webkit-scrollbar-track {
+            border-radius:8px;
+        }
+        /* 滚动条滑块 */
+        .content::-webkit-scrollbar-thumb {
+            border-radius:10px;
+            background:rgba(0,0,0,0);
+        }
+        /* 滚动条滑块移入显示 */
+        .content:hover::-webkit-scrollbar-thumb{
+            background: rgba(0, 0, 0, 0.1);
+        }
+        .bubble{
+            max-width: 400px;
+            padding: 10px;
+            border-radius: 5px;
+            position: relative;
+            color: #000;
+            word-wrap:break-word;
+            word-break:normal;
+        }
+        .item-left .bubble{
+            margin-left: 15px;
+            background-color: #fff;
+        }
+        .item-left .bubble:before{
+            content: "";
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-top: 10px solid transparent;
+            border-right: 10px solid #fff;
+            border-bottom: 10px solid transparent;
+            left: -20px;
+        }
+        .item-right .bubble{
+            margin-right: 15px;
+            background-color: #9eea6a;
+        }
+        .item-right .bubble:before{
+            content: "";
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 10px solid #9eea6a;
+            border-top: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            right: -20px;
+        }
+        .item{
+            margin-top: 15px;
+            display: flex;
+            width: 100%;
+        }
+        .item.item-right{
+            justify-content: flex-end;
+        }
+        .item.item-center{
+            justify-content: center;
+        }
+        .item.item-center span{
+            font-size: 12px;
+            padding: 2px 4px;
+            color: #fff;
+            background-color: #dadada;
+            border-radius: 3px;
+            -moz-user-select:none; /*火狐*/
+            -webkit-user-select:none; /*webkit浏览器*/
+            -ms-user-select:none; /*IE10*/
+            -khtml-user-select:none; /*早期浏览器*/
+            user-select:none;
+        }
+
+        .avatar img{
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+        }
+        .input-area{
+            border-top:0.5px solid #e0e0e0;
+            height: 150px;
+            display: flex;
+            flex-flow: column;
+            background-color: #fff;
+        }
+        textarea{
+            flex: 1;
+            padding: 5px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            overflow-y: auto;
+            overflow-x: hidden;
+            outline:none;
+            resize:none;
+        }
+        button{
+            margin-left: 5px;
+            margin-right: 5px;
+            padding: 10px;
+        }
+        .button-area{
+            display: flex;
+            min-height: 40px;
+            margin-right: 10px;
+            line-height: 40px;
+            padding: 5px;
+            justify-content: flex-end;
+        }
+        .button-area button{
+            max-width: 80px;
+            border: none;
+            outline: none;
+            border-radius: 4px;
+            float: right;
+            cursor: pointer;
+        }
+        .button-area #chmod-btn, .button-area #del-btn {
+            max-width: 120px;
+        }
+        .button-area button:hover{
+            background-color: #e0e0e0;
+        }
+        .button-area button:active{
+            background-color: #bdbdbd;
+        }
+        {#markdown列表样式#}
+        .markdown ol, .markdown ul {
+            padding-left: 1.5em;
+        }
+        .markdown ol {
+            list-style-type: decimal;
+        }
+        .markdown ul {
+            list-style-type: disc;
+        }
+
+        {#markdown代码样式 包含行号#}
+        .markdown pre {
+            padding: 0.5em;
+            overflow: auto;
+            background-color: #2b2b2b;
+            border-radius: 4px;
+        }
+        .markdown pre code {
+            background-color: #2b2b2b;
+            padding: .1rem .1rem;
+            color: #f8f8f2;
+        }
+        {#代码复制按钮格式#}
+        .markdown pre .code-copy-btn {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -khtml-user-select: none;
+            user-select: none;
+            position: absolute;
+            right: 12px;
+            font-size: 12px;
+            line-height: 1;
+            cursor: pointer;
+            color: hsla(0,0%,54.9%,.8);
+            transition: color .1s;
+        }
+        {#行内代码段样式#}
+        .markdown code {
+            color: #c7254e;
+            background-color: #f9f2f4;
+            border-radius: 2px;
+            padding: .25rem .25rem;
+        }
+        .menu{
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 0;
+            display: none;
+        }
+        .menu button{
+            width: 60px;
+            height: 25px;
+            padding: 2px;
+            font-size: 6px;
+            border: 1px solid #A0A0A0;
+            border-radius: 4px;
+            outline: none;
+            background-color: #fff;
+            cursor: pointer;
+            display: none;
+        }
+    </style>
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/marked.min.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_HTML"></script>
+    <script src="https://cdn.staticfile.org/clipboard.js/2.0.4/clipboard.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/a11y-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/highlight.min.js"></script>
+    <!-- and it's easy to individually load additional languages -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/languages/go.min.js"></script>
+
+</head>
+<body>
+    <div class="all-container">
+        <div class="left-container">
+            <div class="chat-list">
+                <div class="newchat" id="newchat">添加新的对话</div>
+
+            </div>
+        </div>
+        <div class="right-container">
+            <div class="content">
+            </div>
+            <div class="input-area">
+                <textarea name="text" id="textarea"></textarea>
+                <div class="button-area">
+                    <button id="stop-btn" class="talk_sub" style="display: none">停止生成</button>
+                    <button id="del-btn" class="talk_sub">删除聊天记录</button>
+                    <button id="chmod-btn" class="talk_sub">当前为普通对话</button>
+                    <button id="send-btn" class="talk_sub">发 送</button>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+{#    当移动到消息框时显示的复制按钮 #}
+{#                默认不显示，由js控制显示#}
+    <div class="menu" id="menu">
+        <button class="menu-btn" id="copy-btn">复制</button>
+        <button class="menu-btn" id="resend-btn">重新发送</button>
+    </div>
+
+
+</body>
+<script>
+    hljs.initHighlightingOnLoad();
+    // 设置marked
+    marked.marked.setOptions({
+        renderer: new marked.Renderer(),
+        highlight: function (code) {
+            return hljs.highlightAuto(code).value;
+        },
+        pedantic: false,
+        gfm: true,
+        tables: true,
+        breaks: false,
+        sanitize: false,
+        smartLists: true,
+        smartypants: false,
+        xhtml: false
+    });
+</script>
+<script>
+    // 当鼠标移动到 bubble-left时显示复制按钮
+    $(document).on("mouseover", ".bubble-left", function () {
+        let copyBtn = $("#menu");
+        let copyBtnItem = $("#copy-btn");
+        let offset = $(this).offset();
+        // 右上角显示
+        $("#resend-btn").hide();
+        copyBtnItem.show();
+        copyBtn.css("display", "block");
+        copyBtn.css("top", offset.top);
+        copyBtn.css("left", offset.left + $(this).width() - copyBtnItem.width() + 10);
+        // 设置复制内容
+        copyBtnItem.attr("data-clipboard-text", $(this).text());
+    });
+    // 移出bubble-left和菜单按钮时才恢复
+    $(document).on("mouseleave", ".bubble-left", function () {
+        // 若进入了菜单按钮 不关闭
+        if (event.toElement.className === "menu-btn") {
+            return;
+        } else {
+            $("#menu").css("display", "none");
+        }
+    });
+    $(document).on("mouseleave", "#menu", function () {
+        $("#menu").css("display", "none");
+    });
+    $(document).on("click", "#copy-btn", function () {
+        let clipboard = new ClipboardJS('#copy-btn');
+        clipboard.on('success', function (e) {
+            console.log(e);
+            // 将显示字符更改为复制成功，一秒后改回
+            $("#copy-btn").text("复制成功");
+            setTimeout(function () {
+                $("#copy-btn").text("复制");
+            }, 2000);
+        });
+        clipboard.on('error', function (e) {
+            console.log(e);
+        });
+        // 光标回归
+        $("#textarea").focus();
+    });
+
+    // 当鼠标移动到 bubble-right时显示重发按钮
+    $(document).on("mouseover", ".bubble-right", function () {
+        let menu = $("#menu");
+        let resendBtn = $("#resend-btn");
+        let offset = $(this).offset();
+        // 右上角显示
+        $("#copy-btn").hide();
+        resendBtn.show();
+        menu.css("display", "block");
+        menu.css("top", offset.top);
+        menu.css("left", offset.left + $(this).width() - resendBtn.width() + 10);
+        // 设置复制内容
+        resendBtn.attr("data-clipboard-text", $(this).text());
+    });
+    // 移出bubble-right和菜单按钮时才恢复
+    $(document).on("mouseleave", ".bubble-right", function () {
+        // 若进入了菜单按钮 不关闭
+        if (event.toElement.className === "menu-btn") {
+            return;
+        } else {
+            $("#menu").css("display", "none");
+        }
+    });
+    $(document).on("mouseleave", "#menu", function () { // 移出菜单按钮
+        $("#menu").css("display", "none");
+    });
+    $(document).on("click", "#resend-btn", function () {
+        // 渲染到输入框
+        let text = $(this).attr("data-clipboard-text");
+        $("#textarea").val(text);
+        // 模拟点击事件
+        $("#send-btn").click();
+        // 光标回归
+        $("#textarea").focus();
+    });
+    $(document).on("mousewheel DOMMouseScroll", function(e) {
+        // 当鼠标滚动时，隐藏菜单
+        $("#menu").css("display", "none");
+    });
+
+
+
+</script>
+<script>
+    MathJax.Hub.Config({        // 公式配置
+        showProcessingMessages: false, //关闭js加载过程信息
+        messageStyle: "none", //不显示信息
+        jax: ["input/TeX", "output/HTML-CSS"],
+        tex2jax: {
+          inlineMath: [["$", "$"], ["\\(", "\\)"]], //行内公式选择符
+          displayMath: [["$$", "$$"], ["\\[", "\\]"]], //段内公式选择符
+          skipTags: ["script", "noscript", "style", "textarea", "pre", "code", "a"] //避开某些标签
+        },
+        "HTML-CSS": {
+          availableFonts: ["STIX", "TeX"], //可选字体
+          showMathMenu: false //关闭右击菜单显示
+        }
+    });
+</script>
+<script>
+
+    window.onload = function(){     //页面加载完成后，自动将光标定位至输入框
+        document.getElementById('textarea').focus();
+    }
+
+    let newchat =  $("#newchat");
+
+    function getMode() {
+        $.ajax({
+            url: "/getMode",
+            type: "Get",
+            dataType: "json",
+            success: function (data) {
+                console.log(data);
+                if (data.mode === "normal") {
+                    $("#chmod-btn").text("当前为普通对话");
+                } else {
+                    $("#chmod-btn").text("当前为连续对话");
+                }
+            }
+        })
+    }
+
+    getMode();
+
+    let selectedChatId;
+
+    $.ajax({
+        url: "/loadChats",
+        type: "Get",
+        dataType: "json",
+        success: function (data) {
+            console.log(data);
+            let chats = data.data;
+            let html = "";
+            for (let i = 0; i < chats.length; i++) {
+                console.log(chats[i].name)
+                console.log(chats[i].selected)
+                if(chats[i].selected === true){
+                    selectedChatId = chats[i].id;
+                }
+                html += '<div class="chat" id='+chats[i].id+' data-name='+chats[i].name+' data-selected='+chats[i].selected+'>' + chats[i].name + '</div>';
+            }
+            if(chats.length === 0){     // 表示是未绑定用户状态
+                $("#del-btn").hide();
+                $("#chmod-btn").hide();
+                $(".chat-list").hide();
+            } else {
+                $(".chat-list").append(html);
+                $(".chat-list").append(newchat);
+                // 将选中的selectedChat添加selected属性
+                $("#"+selectedChatId).addClass("selected");
+                if ($("#"+selectedChatId).data('name')!=='默认对话'){
+                    $("#del-btn").html("删除对话");
+                } else {
+                    $("#del-btn").html("删除聊天记录");
+                }
+            }
+
+        }
+    })
+    $("#newchat").click(function () {
+        console.log("请输入会话名称");
+        let name = prompt("请输入会话名称");
+        if (name === null) {
+            return;
+        }
+        $.ajax({
+            url: "/newChat",
+            type: "Get",
+            dataType: "json",
+            data: {
+                "name": name,
+                "time": get_time_str(new Date())
+            },
+            success: function (data) {
+                console.log(data);
+                if (data.code === 200) {
+                    let html = '<div class="chat" id='+data.data.id+' data-name='+data.data.name+' data-selected='+data.data.selected+'>' + data.data.name + '</div>';
+                    // newchat.remove();
+                    $(".chat-list").append(html);
+                    $(".chat-list").append(newchat);
+                    $("#" + selectedChatId).removeClass("selected");
+                    selectedChatId = data.data.id;
+                    $("#"+selectedChatId).addClass("selected");
+                    $("#del-btn").html("删除对话");
+                    $('.content').empty();
+                    loadHistory();
+                    getMode();
+                }
+            }
+        })
+    })
+
+
+    $(".chat-list").on('click', '.chat', function () {
+        let id = this.id;
+        let click = this;
+        console.log(id);
+        $.ajax({
+            url: "/selectChat",
+            type: "Get",
+            dataType: "json",
+            data: {     // get 方法时 data放置于路径 ?id=
+                "id": id
+            },
+            success: function (data) {
+                console.log(data);
+                if (data.code === 200) {
+                    $("#" + selectedChatId).removeClass("selected");
+                    selectedChatId = id;
+                    $(click).addClass("selected");
+                    $('.content').empty();
+                    if ($("#"+selectedChatId).data('name')!=='默认对话'){
+                        $("#del-btn").html("删除对话");
+                    } else {
+                        $("#del-btn").html("删除聊天记录");
+                    }
+                    loadHistory();
+                    getMode();
+                }
+            }
+        })
+    })
+
+    function loadHistory() {
+        $.ajax({
+            url: "/loadHistory",
+            type: "Get",
+            dataType: "json",
+            success: function (data) {
+                console.log(data);
+                let messages = data.data;
+                var html = "";
+                for (var i = 0; i < messages.length; i++) {
+                    if (messages[i].role === "user") {
+                        html += '<div class="item item-right"><div class="bubble bubble-right">' + messages[i].content + '</div><div class="avatar"><img src="./static/people.jpg" /></div></div>';
+                    } else if(messages[i].role === "assistant"){
+                        html += '<div class="item item-left"><div class="avatar"><img src="./static/icon.png" /></div><div class="bubble bubble-left markdown">' + marked.marked(messages[i].content) + '</div></div>';
+                    } else if (messages[i].role === "system") {
+                        html += '<div class="item item-center"><span>' + messages[i].content + '</span></div>';
+                    }
+                }
+                $(".content").append(html);
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub, $(".content").get()]);   // 异步转换 放入队列中
+                $(".content").scrollTop($(".content")[0].scrollHeight);
+
+			    let preList = $(".markdown pre");
+				preList.each(function(){
+					let btn = $("<span class=\"code-copy-btn\" onclick='codeCopy(this)'>复制代码</span>");
+			        btn.prependTo($(this));
+				});
+            }
+        });
+    }
+    loadHistory();
+
+    function codeCopy(obj) {
+
+        let btn = $(obj);
+        console.log("复制代码");
+        btn.text("");
+        let code = btn.parent().text();
+        btn.text("复制代码");
+
+        // 使用 Clipboard.js 复制文本
+        let clipboard = new ClipboardJS(obj, {
+            text: function() {
+                return code;
+            }
+        });
+
+        // 显示复制结果
+        clipboard.on('success', function(e) {
+            console.log("复制成功");
+            btn.text("复制成功");
+            setTimeout(function(){
+                btn.text("复制代码");
+            }, 1000);
+        });
+        clipboard.on('error', function(e) {
+            console.log("复制失败");
+            btn.text("复制失败");
+            setTimeout(function(){
+                btn.text("复制代码");
+            }, 1000);
+        });
+    }
+
+    let returnMessageAjax = null;
+    function get_time_str(time) {
+        let year = time.getFullYear(); //得到年份
+        let month = time.getMonth()+1;//得到月份
+        let date = time.getDate();//得到日期
+        let hour = time.getHours();//得到小时
+        if (hour < 10) hour = "0" + hour;
+        let minu = time.getMinutes();//得到分钟
+        if (minu < 10) minu = "0" + minu;
+        return year + "年" + month + "月" + date + "日 " + hour + ":" + minu
+    }
+    let last_time = 0
+
+    $("#send-btn").click(function () {
+        console.log("click")
+        var text = $("#textarea").val();
+        console.log("text");
+        console.log(text);
+        if (text == "") {
+            alert("请输入内容");
+            return;
+        }
+        let html = ''
+        let send_time = new Date();
+        let send_time_str = '';
+        if (send_time.getTime() - last_time > 1000 * 60 * 5) {
+            // 以'%Y年%#m月%#d日 %H:%M'格式显示时间
+            html += '<div class="item item-center"><span>' + get_time_str(send_time) + '</span></div>';
+            last_time = send_time.getTime();
+            send_time_str = get_time_str(send_time);
+        }
+        html += '<div class="item item-right"><div class="bubble bubble-right markdown">' + marked.marked(text) + '</div><div class="avatar"><img src="./static/people.jpg" /></div></div>';
+        $(".content").append(html);
+        $("#textarea").val("");
+        $(".content").scrollTop($(".content")[0].scrollHeight);
+        if(text.startsWith('new:')) send_time_str = get_time_str(send_time)
+        let chat_item = $('<div class="item item-left"><div class="avatar"><img src="./static/icon.png" /></div><div class="bubble bubble-left markdown">正在等待回复</div></div>')
+        $(".content").append(chat_item);
+        $(".content").scrollTop($(".content")[0].scrollHeight);
+        let get_times = 0;
+        returnMessageAjax = $.ajax({
+            url: "/returnMessage",
+            data: {
+                "send_message": text,
+                "send_time": send_time_str   // 当为空时，即告知后端不用存储
+            },
+            type: "Post",
+            dataType: "json",
+            xhrFields: {
+                onprogress: function (e) {
+                    let response = e.currentTarget.response;
+                    // console.log(response);
+                    if (response.startsWith("url_redirect:")){
+                        window.location.href=response.split(":")[1];
+                    } else {
+                        get_times += 1;
+                        if (get_times === 2) {
+                            $("#stop-btn").show();
+                        }
+                        let div =  document.createElement('div');
+                        div.innerHTML = marked.marked(response);
+                        MathJax.Hub.Typeset(div);
+                        chat_item.find(".bubble").empty();
+                        chat_item.find(".bubble").append(div);
+                        $(".content").scrollTop($(".content")[0].scrollHeight);
+                    }
+                },
+                onload: function (e) {
+                    $("#stop-btn").hide();
+                }
+            },
+            timeout: 1000 * 60 * 2,
+            complete: function (XMLHttpRequest, status) {
+                if (status === 'timeout') {
+                    alert("请求超时");
+                }
+                $("#stop-btn").hide();
+                let btn = $("<span class=\"code-copy-btn\" onclick='codeCopy(this)'>复制代码</span>");
+                btn.prependTo(chat_item.find(".bubble").find("pre"));
+            }
+        });
+    });
+
+    $("#stop-btn").click(function (){
+        // 停止returnMessage请求
+        if (returnMessageAjax != null) {
+
+            returnMessageAjax.abort();
+            returnMessageAjax = null;
+        }
+        $("#stop-btn").hide();
+    });
+    $("#textarea").keydown(function (e) {
+        if (e.keyCode === 13 && !e.shiftKey) {
+            e.preventDefault();
+            $("#send-btn").click();
+        }
+    });
+    $('#del-btn').click(function () {
+        {#弹窗提醒是否确认删除#}
+        if (confirm("确认删除所有聊天记录吗？非默认对话时将会直接删除该对话")) {
+            $.get("/deleteHistory", function (data) {
+                console.log(data);
+            });
+            window.location.reload()
+        }
+    });
+    $('#chmod-btn').click(function () {
+        if ($("#chmod-btn").text() === "当前为普通对话") {
+            $.get("/changeMode/continuous", function (data) {
+                if(data.code===-1){
+                    alert(data.msg)
+                }  else {
+                    var html = '<div class="item item-center"><span>'+data.data.content+'</span></div>'
+                    $(".content").append(html);
+                    $(".content").scrollTop($(".content")[0].scrollHeight);
+                }
+            });
+            $("#chmod-btn").text("当前为连续对话");
+        } else {
+            $.get("/changeMode/normal", function (data) {
+                if(data.code===-1){
+                    alert(data.msg)
+                }  else {
+                    var html = '<div class="item item-center"><span>'+data.data.content+'</span></div>'
+                    $(".content").append(html);
+                    $(".content").scrollTop($(".content")[0].scrollHeight);
+                }
+            });
+            $("#chmod-btn").text("当前为普通对话");
+        }
+    });
+</script>
+</html>

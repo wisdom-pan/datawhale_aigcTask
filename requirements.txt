@@ -1,0 +1,4 @@
+flask
+requests
+PyYaml
+pysocks
