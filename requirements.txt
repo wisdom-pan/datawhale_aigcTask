@@ -4,8 +4,6 @@ PyYaml
 pysocks
 pypdf
 langchain
-pod_gpt
 pinecone-client
-pod-gpt
-pypdf
 unstructured
+pod-gpt
