@@ -11,6 +11,20 @@ import pickle
 import asyncio
 import yaml
 
+import os
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.text_splitter import CharacterTextSplitter
+from langchain import OpenAI,VectorDBQA
+import pinecone
+from langchain.vectorstores import Pinecone
+import pod_gpt
+from langchain.llms import OpenAI
+
+import pinecone
+
+
+
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
 
@@ -30,12 +44,17 @@ if os.getenv("DEPLOY_ON_RAILWAY") is not None:  # 如果是在Railway上部署�
 API_KEY = os.getenv("OPENAI_API_KEY", default=API_KEY)  # 如果环境变量中设置了OPENAI_API_KEY，则使用环境变量中的OPENAI_API_KEY
 PORT = os.getenv("PORT", default=PORT)  # 如果环境变量中设置了PORT，则使用环境变量中的PORT
 
-STREAM_FLAG = True  # 是否开启流式推送
+STREAM_FLAG = False  # 是否开启流式推送
 USER_DICT_FILE = "all_user_dict_v2.pkl"  # 用户信息存储文件（包含版本）
 lock = threading.Lock()  # 用于线程锁
 
 project_info = "## 智能客服demo    \n" \
                "发送`帮助`可获取帮助  \n"
+
+OPENAI_API_KEY = "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"  # platform.openai.com
+PINECONE_API_KEY = "a67d8b5f-8760-4b29-87a1-164632fb7a7a"  # app.pinecone.io
+PINECONE_ENV = "asia-southeast1-gcp"
+os.environ["OPENAI_API_KEY"] = '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'
 
 
 def get_response_from_ChatGPT_API(message_context, apikey):
@@ -56,7 +75,6 @@ def get_response_from_ChatGPT_API(message_context, apikey):
         "messages": message_context
     }
     url = "https://api.openai.com/v1/chat/completions"
-
     try:
         response = requests.post(url, headers=header, data=json.dumps(data))
         response = response.json()
@@ -158,9 +176,12 @@ def get_response_stream_generate_from_ChatGPT_API(message_context, apikey, messa
     url = "https://api.openai.com/v1/chat/completions"
     # 请求接收流式数据 动态print
     try:
+        
         response = requests.request("POST", url, headers=header, json=data, stream=True)
 
         def generate():
+            # print('nihaohinao')
+            # yield "你好"
             stream_content = str()
             one_message = {"role": "assistant", "content": stream_content}
             message_history.append(one_message)
@@ -490,10 +511,13 @@ def return_message():
             if send_time != "":
                 messages_history.append({'role': 'system', "content": send_time})
             if not STREAM_FLAG:
-                content = handle_messages_get_response(send_message, apikey, messages_history,
-                                                       user_info['chats'][chat_id]['have_chat_context'],
-                                                       chat_with_history)
-
+                # content = handle_messages_get_response(send_message, apikey, messages_history,
+                #                                        user_info['chats'][chat_id]['have_chat_context'],
+                #                                        chat_with_history)
+                # content = "可以"
+                query = send_message
+                content = chain({"query":query+"(用中文回答,如果没有答案，输出：我不知道)"})
+                content = content['result']
                 print(f"用户({session.get('user_id')})得到的回复消息:{content[:40]}...")
                 if chat_with_history:
                     user_info['chats'][chat_id]['have_chat_context'] += 1
@@ -676,4 +700,64 @@ if __name__ == '__main__':
         # 退出程序
         print("请在openai官网注册账号，获取api_key填写至程序内或命令行参数中")
         exit()
+    OPENAI_API_KEY = "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"  # platform.openai.com
+    PINECONE_API_KEY = "a67d8b5f-8760-4b29-87a1-164632fb7a7a"  # app.pinecone.io
+    PINECONE_ENV = "asia-southeast1-gcp"
+    os.environ["OPENAI_API_KEY"] = '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'
+
+    indexer = pod_gpt.Indexer(
+        openai_api_key=OPENAI_API_KEY,
+        pinecone_api_key=PINECONE_API_KEY,
+        pinecone_environment=PINECONE_ENV,
+        index_name="pod-gpt"
+    )
+
+    pinecone.init(
+        api_key=PINECONE_API_KEY,  # app.pinecone.io
+        environment=PINECONE_ENV  # next to API key in console
+    )
+
+    index_name = "pod-gpt"
+
+    if index_name not in pinecone.list_indexes():
+        raise ValueError(
+            f"No '{index_name}' index exists. You must create the index before "
+            "running this notebook. Please refer to the walkthrough at "
+            "'github.com/pinecone-io/examples'."  # TODO add full link
+        )
+
+    index = pinecone.Index(index_name)
+    from langchain.document_loaders import PyPDFLoader
+
+    loader = PyPDFLoader("./实习守则.pdf")
+    # pages = loader.load_and_split()
+    pages = loader.load()
+    #基于seperator划分，如果两个seperator之间的距离大于chunk_size,该chunk的size会大于chunk_size
+    text_splitter = CharacterTextSplitter( separator = "\n \n",chunk_size=500, chunk_overlap=0)
+    #先基于seperators[0]划分，如果两个seperators[0]之间的距离大于chunk_size，使用seperators[1]继续划分......
+    # text_splitter = RecursiveCharacterTextSplitter( separators = ["\n \n","。",",",],chunk_size=500, chunk_overlap=0)
+    split_docs = text_splitter.split_documents(pages)
+    print("chunk numbers :{}".format(len(split_docs)))
+    embeddings = OpenAIEmbeddings()
+
+
+    pinecone.init(
+        api_key=PINECONE_API_KEY,  # app.pinecone.io
+        environment=PINECONE_ENV  # next to API key in console
+    )
+
+    index_name = "pod-gpt"
+
+    if index_name not in pinecone.list_indexes():
+        raise ValueError(
+            f"No '{index_name}' index exists. You must create the index before "
+            "running this notebook. Please refer to the walkthrough at "
+            "'github.com/pinecone-io/examples'."  # TODO add full link
+        )
+
+    index = pinecone.Index(index_name)
+    index.delete(deleteAll='true')
+    docsearch = Pinecone.from_documents(split_docs, embeddings, index_name=index_name)
+    chain = VectorDBQA.from_chain_type(llm=OpenAI(model_name="gpt-3.5-turbo",max_tokens=500,temperature=0), chain_type="stuff", vectorstore=docsearch,return_source_documents=True)
+    print(docsearch.similarity_search("我该如何请假",k=4))
     app.run(host="0.0.0.0", port=PORT, debug=False)
