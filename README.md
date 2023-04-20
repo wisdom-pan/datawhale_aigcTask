@@ -16,42 +16,16 @@
 <details>
 <summary>2. Railway部署（推荐，无需代理，云部署，通过url随时随地访问）</summary>  
   
-  > - 关于Railway：Railway是云容器提供商，你能够使用它部署你的应用，并使用url链接随时随地访问你的应用，Railway使用前提是你的GitHub账号满180天，绑定并验证后每月送5美元和500小时的使用时长，大概21天，因此如果使用这种方式需要在某些不使用的时段停止你的容器  
-  > 1. 首先将代码fork到你的github中
-  > 2. 点击右侧[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new)，然后选择`Deploy from GitHub repo`，再选择`Configure GitHub App`，将会弹出新的窗口，在该窗口中选择`Only select repositories`，然后到下拉列表中选择刚才fork到你账号的仓库
-  ![image](https://user-images.githubusercontent.com/38237931/228179892-340ab8e5-dc20-4365-80bb-8ecc2568a4a8.png)
-  > 3. 授权完成后，`Configure GitHub App`下将会出现授权的项目  
-  ![image](https://user-images.githubusercontent.com/38237931/228181108-597230a2-49b6-4202-bacf-4dd3f9d3da92.png)
-  > 4. 不要点击立即部署，点击添加变量
-  ![image](https://user-images.githubusercontent.com/38237931/228181839-c7fd4404-69ca-4800-bd43-ae1926e82650.png)
-  > 5. 将会跳转至新页面，依次添加`PORT`,`DEPLOY_ON_RAILWAY`以及`OPENAI_API_KEY`三个环境变量,相应值如下PORT为5000，DEPLOY_ON_RAILWAY为true
-  ![image](https://user-images.githubusercontent.com/38237931/228186399-c2a1a802-7394-4c54-8148-057284e047b2.png) 
-  > 6. 修改变量后会自动部署，可点击`Deployments`查看，还可以点击查看日志  
-  ![image](https://user-images.githubusercontent.com/38237931/228187234-4a2b7003-e747-4a50-80fd-36a6f9c5deff.png)
-  > 7. 点击查看日志，成功的一般显示如下  
-  ![image](https://user-images.githubusercontent.com/38237931/228150419-47ea9ffd-2f8d-4851-a5bd-ed9c3d49b28d.png)  
-  > 8. 查看访问url，未生成可点击Generate Domain生成即可，当然如果你自己有域名，还可以添加你自己的自定义域名    
-  ![image](https://user-images.githubusercontent.com/38237931/228151149-ab46e0cf-1936-4e9a-860a-4d82f70185d8.png)  
-
-  > 9. 关于更新，当源仓库更新时，只需要将fork下来的仓库同步更新，railway将会自动部署更新的代码
+ 
+  > . 将会跳转至新页面，依次添加`PORT`,`DEPLOY_ON_RAILWAY`以及`OPENAI_API_KEY`三个环境变量,相应值如下PORT为5000，DEPLOY_ON_RAILWAY为true
+  
+  > . 关于更新，当源仓库更新时，只需要将fork下来的仓库同步更新，railway将会自动部署更新的代码
 
   
   
 </details>
 
-> 1. 点击右侧按钮进行部署[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/oT2ZUt?referralCode=LtUnsq)
-> 首次使用railway的用户需要先绑定github账号并登陆，并进行验证，验证后可获得5美元、500小时每月的免费额度，绑定完成后重新点击上方图标，进行部署，如图进入后填写相关信息和api key  
-> ![image](https://user-images.githubusercontent.com/38237931/228148818-b928763e-eeed-4a7b-a0b2-263bfc3ee4a5.png)  
-> 2. 点击部署后，会自动跳转，等待部署完成即可，如图为部署完成  
-![image](https://user-images.githubusercontent.com/38237931/228154517-b0ed2a1a-0b5e-4321-b613-686a07bd424f.png)
-> 3. 点击查看日志，成功的一般显示如下  
-![image](https://user-images.githubusercontent.com/38237931/228150419-47ea9ffd-2f8d-4851-a5bd-ed9c3d49b28d.png)  
-> 4. 查看访问url，使用该url即可访问  
-![image](https://user-images.githubusercontent.com/38237931/228151149-ab46e0cf-1936-4e9a-860a-4d82f70185d8.png)  
-> 5. 关于更新，点击如下进行更新即可，由Dashboard进入选择如下，但该种方式检查更新的迟滞似乎太高      
-![image](https://user-images.githubusercontent.com/38237931/228157242-0614b216-564b-4abf-8c37-130ca6736fbd.png)
 
-</details>
 
 
 ## 使用介绍
