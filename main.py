@@ -453,12 +453,12 @@ def return_message():
                 # 异步存储all_user_dict
                 asyncio.run(save_all_user_dict())
                 return url_redirect
-        elif send_message.startswith("set_apikey:"):
-            apikey = send_message.split(":")[1]
-            user_info = get_user_info(session.get('user_id'))
-            user_info['apikey'] = apikey
-            print("设置用户专属apikey:\t", apikey)
-            return "设置用户专属apikey成功"
+        # elif send_message.startswith("set_apikey:"):
+        #     apikey = send_message.split(":")[1]
+        #     user_info = get_user_info(session.get('user_id'))
+        #     user_info['apikey'] = apikey
+        #     print("设置用户专属apikey:\t", apikey)
+        #     return "设置用户专属apikey成功"
         elif send_message.startswith("rename_id:"):
             new_user_id = send_message.split(":")[1]
             user_info = get_user_info(session.get('user_id'))
