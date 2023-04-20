@@ -6,4 +6,4 @@ pypdf
 langchain
 pinecone-client
 unstructured
-pod-gpt
+pod_gpt
