@@ -48,7 +48,7 @@ project_info = "## 智能客服demo    \n" \
                "发送`帮助`可获取帮助  \n"
 os.environ["OPENAI_API_KEY"] = API_KEY
 print('key:'+API_KEY)
-
+print('key:'+API_KEY)
 def get_response_from_ChatGPT_API(message_context, apikey):
     """
     从ChatGPT API获取回复
