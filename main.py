@@ -697,11 +697,11 @@ if __name__ == '__main__':
     
     llm = OpenAI(model_name="gpt-3.5-turbo",max_tokens=102)
     llm("怎么评价人工智能")
-    loader = PyPDFLoader("./实习守则.pdf")
+    loader = PyPDFLoader("./腾讯会议知识库.pdf")
     # pages = loader.load_and_split()
     pages = loader.load()
     #基于seperator划分，如果两个seperator之间的距离大于chunk_size,该chunk的size会大于chunk_size
-    text_splitter = CharacterTextSplitter( separator = "\n \n",chunk_size=500, chunk_overlap=0)
+    text_splitter = CharacterTextSplitter( separator = "。",chunk_size=100, chunk_overlap=0)
     #先基于seperators[0]划分，如果两个seperators[0]之间的距离大于chunk_size，使用seperators[1]继续划分......
     # text_splitter = RecursiveCharacterTextSplitter( separators = ["\n \n","。",",",],chunk_size=500, chunk_overlap=0)
     split_docs = text_splitter.split_documents(pages)
@@ -710,5 +710,5 @@ if __name__ == '__main__':
     docsearch = Chroma.from_documents(split_docs, embeddings)
     print("完成向量化")
     chain = VectorDBQA.from_chain_type(llm=OpenAI(model_name="gpt-3.5-turbo",max_tokens=500,temperature=0), chain_type="stuff", vectorstore=docsearch,return_source_documents=True)
-    print(docsearch.similarity_search("我该如何请假",k=4))
+    print(docsearch.similarity_search("新版会员的价格是多少？",k=4))
     app.run(host="0.0.0.0", port=PORT, debug=False)
