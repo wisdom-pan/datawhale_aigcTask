@@ -703,7 +703,8 @@ if __name__ == '__main__':
 
     
     from langchain.document_loaders import PyPDFLoader
-
+    llm = OpenAI(model_name="gpt-3.5-turbo",max_tokens=1024)
+    llm("怎么评价人工智能")
     loader = PyPDFLoader("./实习守则.pdf")
     # pages = loader.load_and_split()
     pages = loader.load()
@@ -714,8 +715,8 @@ if __name__ == '__main__':
     split_docs = text_splitter.split_documents(pages)
     print("chunk numbers :{}".format(len(split_docs)))
     embeddings = OpenAIEmbeddings()
-    docsearch = Chroma.from_documents(split_docs, embeddings, persist_directory="./sample_data")
-
+    docsearch = Chroma.from_documents(split_docs, embeddings)
+    print("完成向量化")
     chain = VectorDBQA.from_chain_type(llm=OpenAI(model_name="gpt-3.5-turbo",max_tokens=500,temperature=0), chain_type="stuff", vectorstore=docsearch,return_source_documents=True)
     print(docsearch.similarity_search("我该如何请假",k=4))
     app.run(host="0.0.0.0", port=PORT, debug=False)
