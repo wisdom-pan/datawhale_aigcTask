@@ -47,10 +47,10 @@ lock = threading.Lock()  # 用于线程锁
 project_info = "## 智能客服demo    \n" \
                "发送`帮助`可获取帮助  \n"
 
-OPENAI_API_KEY = "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"  # platform.openai.com
+OPENAI_API_KEY = "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"  # platform.openai.com
 PINECONE_API_KEY = "a67d8b5f-8760-4b29-87a1-164632fb7a7a"  # app.pinecone.io
 PINECONE_ENV = "asia-southeast1-gcp"
-os.environ["OPENAI_API_KEY"] = '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'
+os.environ["OPENAI_API_KEY"] = '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'
 
 
 def get_response_from_ChatGPT_API(message_context, apikey):
@@ -696,11 +696,6 @@ if __name__ == '__main__':
         # 退出程序
         print("请在openai官网注册账号，获取api_key填写至程序内或命令行参数中")
         exit()
-    OPENAI_API_KEY = "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"  # platform.openai.com
-    PINECONE_API_KEY = "a67d8b5f-8760-4b29-87a1-164632fb7a7a"  # app.pinecone.io
-    PINECONE_ENV = "asia-southeast1-gcp"
-    os.environ["OPENAI_API_KEY"] = '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'
-
     
     from langchain.document_loaders import PyPDFLoader
     llm = OpenAI(model_name="gpt-3.5-turbo",max_tokens=1024)
