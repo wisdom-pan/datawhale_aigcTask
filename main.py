@@ -37,6 +37,11 @@ with open("config.yaml", "r", encoding="utf-8") as f:
 if os.getenv("DEPLOY_ON_RAILWAY") is not None:  # 如果是在Railway上部署，需要删除代理
     os.environ.pop('HTTPS_PROXY', None)
 
+if os.getenv("OPENAI_API_KEY") is not None:  # 如果是在Railway上部署，需要删除代理
+    print('true')
+else:
+    print('false')
+
 API_KEY = os.getenv("OPENAI_API_KEY", default=API_KEY)  # 如果环境变量中设置了OPENAI_API_KEY，则使用环境变量中的OPENAI_API_KEY
 PORT = os.getenv("PORT", default=PORT)  # 如果环境变量中设置了PORT，则使用环境变量中的PORT
 
@@ -46,9 +51,9 @@ lock = threading.Lock()  # 用于线程锁
 
 project_info = "## 智能客服demo    \n" \
                "发送`帮助`可获取帮助  \n"
-os.environ["OPENAI_API_KEY"] = API_KEY
-print('key:'+API_KEY)
-print('key:'+API_KEY)
+# os.environ["OPENAI_API_KEY"] = API_KEY
+# print('key:'+API_KEY)
+# print('key:'+API_KEY)
 def get_response_from_ChatGPT_API(message_context, apikey):
     """
     从ChatGPT API获取回复
