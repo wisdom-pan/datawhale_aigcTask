@@ -710,5 +710,5 @@ if __name__ == '__main__':
     docsearch = Chroma.from_documents(split_docs, embeddings)
     print("完成向量化")
     chain = VectorDBQA.from_chain_type(llm=OpenAI(model_name="gpt-3.5-turbo",max_tokens=500,temperature=0), chain_type="stuff", vectorstore=docsearch,return_source_documents=True)
-    print(docsearch.similarity_search("新版会员的价格是多少？",k=4))
+    print(docsearch.similarity_search("新版会员的价格是多少呢？",k=4))
     app.run(host="0.0.0.0", port=PORT, debug=False)
