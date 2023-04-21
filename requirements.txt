@@ -4,6 +4,5 @@ PyYaml
 pysocks
 pypdf
 langchain
-pinecone-client
 unstructured
 chromadb

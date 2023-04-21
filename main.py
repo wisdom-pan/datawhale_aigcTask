@@ -15,12 +15,8 @@ import os
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
 from langchain import OpenAI,VectorDBQA
-import pinecone
-from langchain.vectorstores import Pinecone
-import pod_gpt
 from langchain.llms import OpenAI
-
-import pinecone
+from langchain.vectorstores import Chroma
 
 
 
@@ -705,28 +701,7 @@ if __name__ == '__main__':
     PINECONE_ENV = "asia-southeast1-gcp"
     os.environ["OPENAI_API_KEY"] = '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'
 
-    indexer = pod_gpt.Indexer(
-        openai_api_key=OPENAI_API_KEY,
-        pinecone_api_key=PINECONE_API_KEY,
-        pinecone_environment=PINECONE_ENV,
-        index_name="pod-gpt"
-    )
-
-    pinecone.init(
-        api_key=PINECONE_API_KEY,  # app.pinecone.io
-        environment=PINECONE_ENV  # next to API key in console
-    )
-
-    index_name = "pod-gpt"
-
-    if index_name not in pinecone.list_indexes():
-        raise ValueError(
-            f"No '{index_name}' index exists. You must create the index before "
-            "running this notebook. Please refer to the walkthrough at "
-            "'github.com/pinecone-io/examples'."  # TODO add full link
-        )
-
-    index = pinecone.Index(index_name)
+    
     from langchain.document_loaders import PyPDFLoader
 
     loader = PyPDFLoader("./实习守则.pdf")
@@ -739,25 +714,8 @@ if __name__ == '__main__':
     split_docs = text_splitter.split_documents(pages)
     print("chunk numbers :{}".format(len(split_docs)))
     embeddings = OpenAIEmbeddings()
+    docsearch = Chroma.from_documents(split_docs, embeddings, persist_directory="./sample_data")
 
-
-    pinecone.init(
-        api_key=PINECONE_API_KEY,  # app.pinecone.io
-        environment=PINECONE_ENV  # next to API key in console
-    )
-
-    index_name = "pod-gpt"
-
-    if index_name not in pinecone.list_indexes():
-        raise ValueError(
-            f"No '{index_name}' index exists. You must create the index before "
-            "running this notebook. Please refer to the walkthrough at "
-            "'github.com/pinecone-io/examples'."  # TODO add full link
-        )
-
-    index = pinecone.Index(index_name)
-    index.delete(deleteAll='true')
-    docsearch = Pinecone.from_documents(split_docs, embeddings, index_name=index_name)
     chain = VectorDBQA.from_chain_type(llm=OpenAI(model_name="gpt-3.5-turbo",max_tokens=500,temperature=0), chain_type="stuff", vectorstore=docsearch,return_source_documents=True)
     print(docsearch.similarity_search("我该如何请假",k=4))
     app.run(host="0.0.0.0", port=PORT, debug=False)
