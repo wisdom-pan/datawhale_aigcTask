@@ -30,7 +30,6 @@ with open("config.yaml", "r", encoding="utf-8") as f:
         if os.environ.get('HTTPS_PROXY') is None:   # 优先使用环境变量中的代理，若环境变量中没有代理，则使用配置文件中的代理
             os.environ['HTTPS_PROXY'] = config['HTTPS_PROXY']
     PORT = config['PORT']
-    API_KEY = config['OPENAI_API_KEY']
     CHAT_CONTEXT_NUMBER_MAX = config['CHAT_CONTEXT_NUMBER_MAX']     # 连续对话模式下的上下文最大数量 n，即开启连续对话模式后，将上传本条消息以及之前你和GPT对话的n-1条消息
     USER_SAVE_MAX = config['USER_SAVE_MAX']     # 设置最多存储n个用户，当用户过多时可适当调大
 
@@ -39,10 +38,11 @@ if os.getenv("DEPLOY_ON_RAILWAY") is not None:  # 如果是在Railway上部署�
 
 if os.getenv("OPENAI_API_KEY") is not None:  # 如果是在Railway上部署，需要删除代理
     print('true')
+    print(os.getenv("OPENAI_API_KEY"))
 else:
     print('false')
 
-API_KEY = os.getenv("OPENAI_API_KEY", default=API_KEY)  # 如果环境变量中设置了OPENAI_API_KEY，则使用环境变量中的OPENAI_API_KEY
+API_KEY = os.getenv("OPENAI_API_KEY")  # 如果环境变量中设置了OPENAI_API_KEY，则使用环境变量中的OPENAI_API_KEY
 PORT = os.getenv("PORT", default=PORT)  # 如果环境变量中设置了PORT，则使用环境变量中的PORT
 
 STREAM_FLAG = False  # 是否开启流式推送
@@ -51,9 +51,6 @@ lock = threading.Lock()  # 用于线程锁
 
 project_info = "## 智能客服demo    \n" \
                "发送`帮助`可获取帮助  \n"
-# os.environ["OPENAI_API_KEY"] = API_KEY
-# print('key:'+API_KEY)
-# print('key:'+API_KEY)
 def get_response_from_ChatGPT_API(message_context, apikey):
     """
     从ChatGPT API获取回复
