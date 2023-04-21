@@ -6,3 +6,4 @@ pypdf
 langchain
 unstructured
 chromadb
+openai
