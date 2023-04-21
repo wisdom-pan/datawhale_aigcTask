@@ -46,12 +46,8 @@ lock = threading.Lock()  # 用于线程锁
 
 project_info = "## 智能客服demo    \n" \
                "发送`帮助`可获取帮助  \n"
-
-OPENAI_API_KEY = "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"  # platform.openai.com
-PINECONE_API_KEY = "a67d8b5f-8760-4b29-87a1-164632fb7a7a"  # app.pinecone.io
-PINECONE_ENV = "asia-southeast1-gcp"
-os.environ["OPENAI_API_KEY"] = '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'
-
+os.environ["OPENAI_API_KEY"] = API_KEY
+print('key:'+API_KEY)
 
 def get_response_from_ChatGPT_API(message_context, apikey):
     """
