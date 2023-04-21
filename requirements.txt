@@ -7,3 +7,4 @@ langchain
 unstructured
 chromadb
 openai
+tiktoken
