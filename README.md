@@ -18,10 +18,17 @@
   
  
   > . 将会跳转至新页面，依次添加`PORT`,`DEPLOY_ON_RAILWAY`以及`OPENAI_API_KEY`三个环境变量,相应值如下PORT为5000，DEPLOY_ON_RAILWAY为true
-  
-  > . 关于更新，当源仓库更新时，只需要将fork下来的仓库同步更新，railway将会自动部署更新的代码
 
+ # 方案
+ 基于langchain构造本地数据知识库，前后端可以直接部署服务，可以回答工作的一些问题
+ * 会议室预定
+ * 人事变动
+ * 新人培训
+ * 流程答疑
   
+# demo演示
+
+ 
   
 </details>
 
