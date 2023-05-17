@@ -335,9 +335,7 @@ def new_user_dict(user_id, send_time):
 
     user_dict['chats'][chat_id]['messages_history'].insert(1, {"role": "assistant",
                                                                "content": "- 创建新的用户id成功，请牢记该id  \n"
-                                                                          "- 您可以使用该网站提供的通用apikey进行对话，"
-                                                                          "也可以输入 set_apikey:[your_apikey](https://platform.openai.com/account/api-keys) "
-                                                                          "来设置用户专属apikey"})
+                                                                          })
     return user_dict
 
 
@@ -505,12 +503,13 @@ def return_message():
             if send_time != "":
                 messages_history.append({'role': 'system', "content": send_time})
             if not STREAM_FLAG:
-                # content = handle_messages_get_response(send_message, apikey, messages_history,
-                #                                        user_info['chats'][chat_id]['have_chat_context'],
-                #                                        chat_with_history)
+                content = handle_messages_get_response(send_message, apikey, messages_history,
+                                                       user_info['chats'][chat_id]['have_chat_context'],
+                                                       chat_with_history)
                 # content = "可以"
                 query = send_message
-                content = chain({"query":query+"(用中文回答,如果没有答案，输出：我不知道)"})
+                content = chain(
+                    {"query": query+"(用中文回答，不要用英文回答。如果没有答案输出：我不知道)"})
                 content = content['result']
                 print(f"用户({session.get('user_id')})得到的回复消息:{content[:40]}...")
                 if chat_with_history:
@@ -709,6 +708,6 @@ if __name__ == '__main__':
     embeddings = OpenAIEmbeddings()
     docsearch = Chroma.from_documents(split_docs, embeddings)
     print("完成向量化")
-    chain = VectorDBQA.from_chain_type(llm=OpenAI(model_name="gpt-3.5-turbo",max_tokens=500,temperature=0), chain_type="stuff", vectorstore=docsearch,return_source_documents=True)
+    chain = VectorDBQA.from_chain_type(llm=OpenAI(model_name="gpt-3.5-turbo",max_tokens=512,temperature=0), chain_type="stuff", vectorstore=docsearch,return_source_documents=True)
     print(docsearch.similarity_search("新版会员的价格是多少呢？",k=4))
-    app.run(host="0.0.0.0", port=PORT, debug=False)
+    app.run(host="0.0.0.0", port=7000, debug=False)
